@@ -24,7 +24,7 @@ import spotify_logo from "./spotify_logo.png";
 import clock_icon from "./clock_icon.png";
 
 
-import aadukalam from "./img/song-thumb/aadukalam.webp";
+import aadukalam from "./img/song-thumb/aadukalam.png";
 import david from "./img/song-thumb/david.png";
 import dhaamdhoom from "./img/song-thumb/dhaam_dhoom.png";
 import enpt from "./img/song-thumb/enpt.jpeg";
