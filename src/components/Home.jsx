@@ -1,4 +1,4 @@
- import { useContext, useEffect } from "react";
+  import { useContext, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Player from "./Player";
 import Display from "./Display";
@@ -13,14 +13,15 @@ const Home = () => {
       audioRef.current.load(); // ⬅️ forces reload of the new source
     }
   }, [track, audioRef]);
-
-  if (!track) {
-    return (
-      <div className="h-screen flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
-  }
+ // ...existing code...
+if (!track || !track.file) {
+  return (
+    <div className="h-screen flex items-center justify-center text-white">
+      No songs available or failed to load.
+    </div>
+  );
+}
+// ...existing code...
 
   return (
     <div className="h-screen bg-black">

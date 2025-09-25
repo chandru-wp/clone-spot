@@ -1,4 +1,4 @@
- import React, { useContext } from "react";
+  import React, { useContext } from "react";
 import { assets } from "../assets/assets";
 import { PlayerContext } from "../context/PlayerContext";
 
@@ -14,7 +14,7 @@ const Player = () => {
     after,
     before,
     seekBgClick,
-     
+      
   toggleRepeat,
      shuffle,
   } = useContext(PlayerContext);

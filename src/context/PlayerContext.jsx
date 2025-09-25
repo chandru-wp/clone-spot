@@ -1,4 +1,4 @@
- import { createContext, useEffect, useRef, useState } from "react";
+  import React, { createContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 export const PlayerContext = createContext();
@@ -18,20 +18,23 @@ const PlayerContextProvider = ({ children }) => {
   });
 
   // Fetch songs from API
-  useEffect(() => {
-    const fetchSongs = async () => {
-      try {
-        const res = await axios.get("https://spotgpt-backend.onrender.com/api/song/list");
-        const fetchedSongs = res.data.songs || [];
-        setSongs(fetchedSongs);
-        if (fetchedSongs.length > 0) setTrack(fetchedSongs[0]); // default: first song
-      } catch (error) {
-        console.error("Error fetching songs:", error);
-      }
-    };
-    fetchSongs();
-  }, []);
-
+  // ...existing code...
+useEffect(() => {
+  const fetchSongs = async () => {
+    try {
+      const res = await axios.get("https://spotgpt-backend.onrender.com/api/song/list");
+      const fetchedSongs = res.data.songs || [];
+      setSongs(fetchedSongs);
+      if (fetchedSongs.length > 0) setTrack(fetchedSongs[0]);
+      else setTrack({ name: "No songs", file: "", image: "" }); // fallback
+    } catch (error) {
+      console.error("Error fetching songs:", error);
+      setTrack({ name: "Error", file: "", image: "" }); // fallback
+    }
+  };
+  fetchSongs();
+}, []);
+// ...existing code...
   // Fetch albums from API
   useEffect(() => {
     const fetchAlbums = async () => {

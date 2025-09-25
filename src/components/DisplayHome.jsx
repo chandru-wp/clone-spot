@@ -1,4 +1,4 @@
- import React, { useEffect, useState, useContext, useRef } from "react";
+  import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import { albumsData } from "../assets/assets";
