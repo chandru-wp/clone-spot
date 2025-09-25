@@ -1,7 +1,7 @@
  import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import DisplayHome from './DisplayHome';
-import DisplayAlbum from './DisplayAlbum';
+import DisplayHome from '../components/DisplayHome';
+import DisplayAlbum from '../components/DisplayAlbum';
 import DisplaySong from './DisplaySong';
 // commit
 const Display = () => {

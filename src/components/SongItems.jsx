@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlayerContext } from '../context/PlayerContext';
 
-const SongItem = ({ id, name, desc, image }) => {
+const SongItems = ({ id, name, desc, image }) => {
     const navigate = useNavigate();
     const { playWithId } = useContext(PlayerContext);
 
@@ -19,4 +19,4 @@ const SongItem = ({ id, name, desc, image }) => {
     );
 };
 
-export default SongItem;
+export default SongItems;

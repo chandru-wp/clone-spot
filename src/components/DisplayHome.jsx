@@ -1,7 +1,7 @@
  import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import AlbumItems from './AlbumItems';
-import SongItem from './SongItem';
+import SongItem from './SongItems';
 
 const DisplayHome = () => {
   const [albumsData, setAlbumsData] = useState([]);
