@@ -1,147 +1,200 @@
-  import React, { createContext, useEffect, useRef, useState } from "react";
-import axios from "axios";
+ import React, { createContext, useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 
 export const PlayerContext = createContext();
 
-const PlayerContextProvider = ({ children }) => {
-  const audioRef = useRef(new Audio());
-  const seekBg = useRef();
-  const seekBar = useRef();
+const PlayerContextProvider = (props) => {
+    const audioRef = useRef();
 
-  const [songs, setSongs] = useState([]);   // fetched songs
-  const [albums, setAlbums] = useState([]); // ✅ fetched albums
-  const [track, setTrack] = useState(null); // current track
-  const [playStatus, setPlayStatus] = useState(false);
-  const [time, setTime] = useState({
-    currentTime: { second: "--", minute: "--" },
-    totalTime: { second: "--", minute: "--" },
-  });
-
-  // Fetch songs from API
-  // ...existing code...
-useEffect(() => {
-  const fetchSongs = async () => {
-    try {
-      const res = await axios.get("https://spotgpt-backend.onrender.com/api/song/list");
-      const fetchedSongs = res.data.songs || [];
-      setSongs(fetchedSongs);
-      if (fetchedSongs.length > 0) setTrack(fetchedSongs[0]);
-      else setTrack({ name: "No songs", file: "", image: "" }); // fallback
-    } catch (error) {
-      console.error("Error fetching songs:", error);
-      setTrack({ name: "Error", file: "", image: "" }); // fallback
-    }
-  };
-  fetchSongs();
-}, []);
-// ...existing code...
-  // Fetch albums from API
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      try {
-        const res = await axios.get("https://spotgpt-backend.onrender.com/api/album/list");
-        setAlbums(res.data.albums || []); // ✅ assuming API returns { albums: [...] }
-      } catch (error) {
-        console.error("Error fetching albums:", error);
-      }
-    };
-    fetchAlbums();
-  }, []);
-
-  // Update audio src when track changes
-  useEffect(() => {
-    if (track && track.url) {
-      audioRef.current.src = track.url;
-      audioRef.current.play().catch(() => {}); 
-      setPlayStatus(true);
-    }
-  }, [track]);
-
-  // Update seek bar and time
-  useEffect(() => {
-    const updateTime = () => {
-      if (!audioRef.current.duration) return;
-      if (seekBar.current)
-        seekBar.current.style.width =
-          (audioRef.current.currentTime / audioRef.current.duration) * 100 + "%";
-      setTime({
+    const [songs, setSongs] = useState([]);
+    const [track, setTrack] = useState(null);
+    const [playStatus, setPlayStatus] = useState(false);
+    const [isLooping, setIsLooping] = useState(false);
+    const [time, setTime] = useState({
         currentTime: {
-          second: Math.floor(audioRef.current.currentTime % 60),
-          minute: Math.floor(audioRef.current.currentTime / 60),
+            second: 0,
+            minute: 0
         },
         totalTime: {
-          second: Math.floor(audioRef.current.duration % 60),
-          minute: Math.floor(audioRef.current.duration / 60),
-        },
-      });
+            second: 0,
+            minute: 0
+        }
+    });
+
+    // Helper function to handle the playback logic
+    const attemptPlay = async (song) => {
+        if (!audioRef.current || !song) {
+            console.error("AudioRef or selected song is not available.");
+            return;
+        }
+
+        // 1. Set the track state (async update)
+        setTrack(song); 
+
+        // 2. Set audio source immediately
+        audioRef.current.src = song.file;
+        audioRef.current.load(); 
+
+        try {
+            // 3. Attempt to play
+            await audioRef.current.play();
+            setPlayStatus(true);
+        } catch (error) {
+            // 4. Handle Autoplay prevention
+            if (error.name === "NotAllowedError" || error.name === "AbortError") {
+                console.warn("Autoplay prevented: The user needs to manually click play.");
+                // IMPORTANT: If playback is blocked, the song IS NOT playing. Set status to false.
+                setPlayStatus(false); 
+            } else {
+                console.error("Error attempting to play audio:", error);
+                setPlayStatus(false);
+            }
+        }
+    }
+    
+    // --- Public Player Controls ---
+
+    const play = () => {
+        if (track && audioRef.current) {
+            audioRef.current.play();
+            setPlayStatus(true);
+        }
     };
-    audioRef.current.ontimeupdate = updateTime;
-    return () => (audioRef.current.ontimeupdate = null);
-  }, [track]);
 
-  // Player controls
-  const play = () => audioRef.current.play().then(() => setPlayStatus(true));
-  const pause = () => { audioRef.current.pause(); setPlayStatus(false); };
+    const pause = () => {
+        if (track && audioRef.current) {
+            audioRef.current.pause();
+            setPlayStatus(false);
+        }
+    };
 
-  const playWithId = (index) => {
-    if (!songs[index]) return;
-    setTrack(songs[index]);
-  };
- const before = () => {
-  if (!track || !songs.length) return;
-  const currentIndex = songs.findIndex(s => s._id === track._id);
-  if (currentIndex > 0) setTrack(songs[currentIndex - 1]);
-};
+    const playWithId = async (id) => {
+        const selectedSong = songs.find(song => song._id === id);
+        if (selectedSong) {
+            // Use the new helper function for playback
+            await attemptPlay(selectedSong);
+        }
+    };
+    
+    // Logic for finding and playing the previous track
+    const playPrevious = () => {
+        if (track && songs.length > 0) {
+            const currentIndex = songs.findIndex(song => song._id === track._id);
+            const newIndex = (currentIndex - 1 + songs.length) % songs.length;
+            // Directly use the new song object for playback
+            attemptPlay(songs[newIndex]);
+        }
+    };
+    
+    // Logic for finding and playing the next track
+    const playNext = () => {
+        if (track && songs.length > 0) {
+            const currentIndex = songs.findIndex(song => song._id === track._id);
+            const newIndex = (currentIndex + 1) % songs.length;
+            // Directly use the new song object for playback
+            attemptPlay(songs[newIndex]);
+        }
+    };
 
-const after = () => {
-  if (!track || !songs.length) return;
-  const currentIndex = songs.findIndex(s => s._id === track._id);
-  if (currentIndex !== -1 && currentIndex < songs.length - 1) {
-    setTrack(songs[currentIndex + 1]);
-  }
-};
-  const seekBgClick = (e) => {
-    if (!seekBg.current) return;
-    audioRef.current.currentTime =
-      (e.nativeEvent.offsetX / seekBg.current.offsetWidth) * audioRef.current.duration;
-  };
-  const shuffle = () => {
-  if (!songs.length) return;
-  const randomIndex = Math.floor(Math.random() * songs.length);
-  setTrack(songs[randomIndex]);
-};
-const [repeat, setRepeat] = useState(false);
+    const toggleLoop = () => {
+        const newLoopStatus = !isLooping;
+        setIsLooping(newLoopStatus);
+        if (audioRef.current) {
+            audioRef.current.loop = newLoopStatus; 
+        }
+    };
 
-const toggleRepeat = () => {
-  setRepeat(r => !r);
-  audioRef.current.loop = !repeat;
-};
-  return (
-    <PlayerContext.Provider
-      value={{
+    const seekSong = (e) => {
+        if (audioRef.current && audioRef.current.duration) {
+            audioRef.current.currentTime = ((e.nativeEvent.offsetX / e.nativeEvent.target.offsetWidth) * audioRef.current.duration);
+        }
+    };
+
+    // --- Effects ---
+
+    // 1. EFFECT: Fetch songs and set initial track
+    useEffect(() => {
+        const fetchSongs = async () => {
+            try {
+                const res = await axios.get("https://spotgpt-backend.onrender.com/api/song/list");
+                setSongs(res.data.songs);
+                if (res.data.songs.length > 0) {
+                    // Set the initial track state. Do NOT attempt to play here due to Autoplay rules.
+                    setTrack(res.data.songs[0]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch songs:", err);
+            }
+        };
+        fetchSongs();
+    }, []);
+
+    // 2. EFFECT: Handle audio playback events (runs when track/isLooping/songs changes)
+    // NOTE: We don't need to set audioRef.current.src here anymore since attemptPlay does it.
+    useEffect(() => {
+        if (track && audioRef.current) {
+            // Define event handlers
+            const updateTime = () => {
+                if (isNaN(audioRef.current.duration)) return;
+                
+                setTime({
+                    currentTime: {
+                        second: Math.floor(audioRef.current.currentTime % 60),
+                        minute: Math.floor(audioRef.current.currentTime / 60)
+                    },
+                    totalTime: {
+                        second: Math.floor(audioRef.current.duration % 60),
+                        minute: Math.floor(audioRef.current.duration / 60)
+                    }
+                });
+            };
+
+            const handleSongEnd = () => {
+                setPlayStatus(false);
+                // Only auto-play next if not looping
+                if (!isLooping) { 
+                    playNext();
+                }
+            };
+            
+            // Attach event listeners
+            audioRef.current.ontimeupdate = updateTime;
+            audioRef.current.onended = handleSongEnd;
+
+            // Cleanup function
+            return () => {
+                if (audioRef.current) {
+                    audioRef.current.ontimeupdate = null;
+                    audioRef.current.onended = null;
+                }
+            };
+        }
+    }, [track, isLooping, songs]); // Depend on track, looping status, and songs array
+
+    const contextValue = {
         audioRef,
-        seekBg,
-        seekBar,
-        songs,
-        albums,   // ✅ now available everywhere
+        songs, 
         track,
-        playStatus,
-        time,
         setTrack,
+        playStatus,
+        setPlayStatus,
+        time,
+        setTime,
         play,
         pause,
         playWithId,
-        before,
-        after,
-        seekBgClick,
-         repeat,
-    toggleRepeat,
-         shuffle,
-      }}
-    >
-      {children}
-    </PlayerContext.Provider>
-  );
+        seekSong,
+        playNext,
+        playPrevious,
+        isLooping,
+        toggleLoop
+    };
+
+    return (
+        <PlayerContext.Provider value={contextValue}>
+            {props.children}
+        </PlayerContext.Provider>
+    );
 };
 
 export default PlayerContextProvider;

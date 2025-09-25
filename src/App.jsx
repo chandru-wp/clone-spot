@@ -1,14 +1,13 @@
- import Home from './components/Home'
- 
+ import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Home from '../Components/Home';
 
 function App() {
-
   return (
     <>
-    
-    <Home/>
+      <Home/>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
