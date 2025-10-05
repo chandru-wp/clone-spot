@@ -20,7 +20,7 @@ const DisplayAlbum = () => {
           throw new Error('Failed to fetch songs');
         }
         const data = await response.json();
-        
+
         const album = {
           image: data.songs[0]?.image || assets.spotify_logo,
           name: "Sibi's PlayList",

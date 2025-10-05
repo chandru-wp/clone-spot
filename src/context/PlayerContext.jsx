@@ -97,18 +97,19 @@ const PlayerContextProvider = (props) => {
     };
 
     const toggleLoop = () => {
-        const newLoopStatus = !isLooping;
-        setIsLooping(newLoopStatus);
-        if (audioRef.current) {
-            audioRef.current.loop = newLoopStatus; 
-        }
-    };
+          audioRef.current.currentTime=0;
+    audioRef.current.play();
+    setPlayStatus(true);
+  
+};
 
-    const seekSong = (e) => {
-        if (audioRef.current && audioRef.current.duration) {
-            audioRef.current.currentTime = ((e.nativeEvent.offsetX / e.nativeEvent.target.offsetWidth) * audioRef.current.duration);
-        }
-    };
+const seekSong = () => {
+    if (songs.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * songs.length);
+    const randomSong = songs[randomIndex];
+    attemptPlay(randomSong);
+};
+
 
     // --- Effects ---
 

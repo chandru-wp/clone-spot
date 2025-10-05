@@ -39,10 +39,10 @@ export const Player = () => {
             {/* Center: player controls and seek bar */}
             <div className="flex flex-col items-center gap-1 m-auto">
                 <div className="flex gap-4">
-                    <img className="w-4 cursor-pointer opacity-50" src={assets.shuffle_icon} alt="Shuffle" />
+                    <img onClick={seekSong} className="w-4 cursor-pointer  " src={assets.shuffle_icon} alt="Shuffle" />
                     
                     {/* Previous Button */}
-                    <img onClick={playPrevious} className="w-4 cursor-pointer" src={assets.prev_icon} alt="Previous" />
+                    <img onClick={playPrevious} className="w-4 cursor-pointer " src={assets.prev_icon} alt="Previous" />
                     
                     {/* Play/Pause Button */}
                     {playStatus
@@ -57,7 +57,7 @@ export const Player = () => {
                     <img 
                         onClick={toggleLoop} 
                         // Visual feedback for loop status
-                        className={`w-4 cursor-pointer ${isLooping ? 'opacity-100 text-green-500' : 'opacity-50'}`} 
+                        className="w-4 cursor-pointer "
                         src={assets.loop_icon} 
                         alt="Loop" 
                     />
