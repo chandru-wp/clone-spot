@@ -69,7 +69,7 @@ const DisplayAlbum = () => {
           </div>
         </div>
 
-        {/* Song List Header */}
+   {/* Song List Header */}
         <div className='grid grid-cols-3 md:grid-cols-[1fr_2fr_1fr_1fr] text-gray-400 text-sm md:text-base mb-4 border-b border-gray-700 py-2 font-medium'>
           <p className='col-span-1 md:col-span-1'>#</p>
           <p className='hidden md:block col-span-1 md:col-span-1'>Title</p>
@@ -90,7 +90,7 @@ const DisplayAlbum = () => {
             <div className='flex items-center gap-4 col-span-2 md:col-span-1'>
               <img className='w-10 h-10 rounded' src={item.image} alt={item.name} />
               <div className='flex flex-col'>
-                <p className='text-white'>{item.name}</p>
+ <p className='text-white'>{item.name}</p>
                 <p className='text-sm text-gray-400'>{item.desc}</p>
               </div>
             </div>
